@@ -1,7 +1,8 @@
 #!/bin/bash
 
-export MIGRATE_URL=postgres://postgres@localhost:5432/rg_2015?sslmode=disable
+export F18_DB=rg_2015
+export F18_MIGRATE_URL=postgres://postgres@localhost:5432/$F18_DB?sslmode=disable
 
-migrate -url $MIGRATE_URL -path ./sql up
-migrate -url $MIGRATE_URL -path ./sql version
+migrate -url $F18_MIGRATE_URL -path ./sql up
+migrate -url $F18_MIGRATE_URL -path ./sql version
 

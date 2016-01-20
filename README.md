@@ -11,9 +11,9 @@ golang
 init
 --------
 
-      export MIGRATE_URL=postgres://postgres@localhost:5432/rg_2015?sslmode=disable 
+      export F18_MIGRATE_URL=postgres://postgres@localhost:5432/rg_2015?sslmode=disable 
 
-      migrate -url $MIGRATE_URL -path ./sql create init
+      migrate -url $F18_MIGRATE_URL -path ./sql create init
 
 
       $ ls -l db_migrations/
@@ -24,19 +24,19 @@ init
 migrate
 ----------
 
-      $ migrate -url $MIGRATE_URL -path ./sql up
+      $ migrate -url $F18_MIGRATE_URL -path ./sql up
       > 0001_init.up.sql
       > 0002_drop_sql_tables_semaphores.up.sql
 
 
-      $ migrate -url $MIGRATE_URL -path ./sql version
+      $ migrate -url $F18_MIGRATE_URL -path ./sql version
       2
 
 
 run.sh
 -------
 
-      ./run.sh
+      source ./run.sh
 
 
       0.0074 seconds
