@@ -11,7 +11,8 @@ golang
 init
 --------
 
-      export F18_MIGRATE_URL=postgres://postgres@localhost:5432/rg_2015?sslmode=disable 
+      export F18_DB=rg_2015
+      export F18_MIGRATE_URL=postgres://postgres@localhost:5432/$F18_DB?sslmode=disable 
 
       migrate -url $F18_MIGRATE_URL -path ./sql create init
 
@@ -44,6 +45,9 @@ run.sh
 
 
 
+      echo "set search_path to fmk ; \dt;" | psql $F18_DB | grep rows
+
+
 build windows
 -------------
 
@@ -68,4 +72,11 @@ index b6da438..bbe789e 100644
 
       $ cd /Users/ernadhusremovic/go/src/github.com/mattes/migrate
       $ GOOS=windows GOARCH=386 go build -o migrate.exe main.go version.go
+
+
+test migrate on windows
+------------------------
+
+      C:\Users\Ernad\Documents\GitHub\F18_migrations [master]> windows\migrate -url postgres://postgres:password@127.0.0.1/rg
+2015?sslmode=disable -path sql version
 
