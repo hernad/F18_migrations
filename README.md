@@ -32,3 +32,13 @@ migrate
       $ migrate -url $MIGRATE_URL -path ./sql version
       2
 
+
+run.sh
+-------
+
+      ./run.sh
+
+
+      0.0074 seconds
+      2
+
