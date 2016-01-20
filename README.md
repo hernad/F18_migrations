@@ -42,3 +42,30 @@ run.sh
       0.0074 seconds
       2
 
+
+
+build windows
+-------------
+
+exclude sqlite3 driver:
+
+<pre>
+$ git diff
+diff --git a/main.go b/main.go
+index b6da438..bbe789e 100644
+--- a/main.go
++++ b/main.go
+@@ -15,7 +15,7 @@ import (
+        _ "github.com/mattes/migrate/driver/cassandra"
+        _ "github.com/mattes/migrate/driver/mysql"
+        _ "github.com/mattes/migrate/driver/postgres"
+-       _ "github.com/mattes/migrate/driver/sqlite3"
++       //_ "github.com/mattes/migrate/driver/sqlite3"
+        "github.com/mattes/migrate/file"
+        "github.com/mattes/migrate/migrate"
+        "github.com/mattes/migrate/migrate/direction"
+</pre>
+
+      $ cd /Users/ernadhusremovic/go/src/github.com/mattes/migrate
+      $ GOOS=windows GOARCH=386 go build -o migrate.exe main.go version.go
+
