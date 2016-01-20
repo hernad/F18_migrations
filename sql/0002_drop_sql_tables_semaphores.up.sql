@@ -13,5 +13,3 @@ drop table semaphores_vrstep;
 drop table semaphores_pkonto;
 drop table semaphores_fakt_objekti;
 drop table semaphores_ks;
-
-
