@@ -2,7 +2,8 @@
 
 
 -- drop FUNCTION konto_stanje( mag_prod varchar(1), param_konto varchar(7),  param_idroba varchar(10), param_datum date );
--- drop type ulaz_izlaz;
+
+drop type IF EXISTS ulaz_izlaz cascade;
 
 create type ulaz_izlaz as (ulaz double precision, izlaz double precision, nv_u double precision, nv_i double precision);
 
