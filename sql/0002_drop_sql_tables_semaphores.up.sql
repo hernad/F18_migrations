@@ -13,3 +13,4 @@ drop table if exists semaphores_vrstep;
 drop table if exists semaphores_pkonto;
 drop table if exists semaphores_fakt_objekti;
 drop table if exists semaphores_ks;
+set search_path to public;
