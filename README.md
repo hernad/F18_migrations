@@ -34,14 +34,14 @@ migrate
       2
 
 
+
 run.sh
 -------
 
-      source ./run.sh
-
+      ./run.sh f18-db.bring.out.ba admin adminpass bringout_2015
 
       0.0074 seconds
-      2
+      10
 
 
 
