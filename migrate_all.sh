@@ -15,7 +15,7 @@ SQLPATH=./F18_migrations/sql
 MIGRATE=./F18_migrations/windows/migrate.exe
 export PGPASSWORD PGUSER
 
-if [ -z "$4" ]
+if [ -n "$4" ]
   then
     DB=$(psql -lt -h $PGHOST -U $PGUSER | egrep -v 'template[01]' | egrep -v 'postgres' | grep _ | grep $4 |awk '{print $1}')
   else
