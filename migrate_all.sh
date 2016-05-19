@@ -11,8 +11,8 @@ fi
 PGUSER=$1
 PGPASSWORD=$2
 PGHOST=$3
-SQLPATH=./F18_migrations/sql
-MIGRATE=./F18_migrations/windows/migrate.exe
+SQLPATH=./sql
+MIGRATE=./windows/migrate.exe
 export PGPASSWORD PGUSER
 
 if [ -n "$4" ]
