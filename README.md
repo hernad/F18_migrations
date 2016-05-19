@@ -25,9 +25,9 @@ init
 migrate_all
 -------------
 
-usage ./migrate_all.sh  <pguser> <pass> <server>   opcija: <godina ili naziv firme>
+     usage ./migrate_all.sh  <pguser> <pass> <server>   opcija: <godina ili naziv firme>
 
-./migrate_all.sh admin pwd localhost 2016 # migracija samo radne sezone 
+     ./migrate_all.sh admin pwd localhost 2016 # migracija samo radne sezone 
 
 
 migrate
