@@ -15,6 +15,6 @@ export F18_DB
 
 export F18_MIGRATE_URL=postgres://$USER:$PASS@$HOST:5432/$F18_DB?sslmode=disable
 
-migrate -url $F18_MIGRATE_URL -path ./sql up
-migrate -url $F18_MIGRATE_URL -path ./sql version
+./migrate -url $F18_MIGRATE_URL -path ./sql up
+./migrate -url $F18_MIGRATE_URL -path ./sql version
 

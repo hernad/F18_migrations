@@ -12,7 +12,7 @@ PGUSER=$1
 PGPASSWORD=$2
 PGHOST=$3
 SQLPATH=./sql
-MIGRATE=./windows/migrate.exe
+MIGRATE=./migrate
 export PGPASSWORD PGUSER
 
 if [ -n "$4" ]
