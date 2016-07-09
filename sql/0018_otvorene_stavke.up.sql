@@ -84,6 +84,22 @@ END
 $body$
 LANGUAGE plpgsql;
 
+--  convert_to_integer( 'bad' ) => 0
+
+CREATE OR REPLACE FUNCTION convert_to_integer(v_input text)
+RETURNS INTEGER AS $$
+DECLARE v_int_value INTEGER DEFAULT 0;
+BEGIN
+    BEGIN
+        v_int_value := v_input::INTEGER;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Invalid integer value: "%".  Returning 0.', v_input;
+        RETURN 0;
+    END;
+RETURN v_int_value;
+END;
+$$ LANGUAGE plpgsql;
+
 
 drop view IF EXISTS v_dugovanja;
 
@@ -91,7 +107,7 @@ CREATE VIEW v_dugovanja as
 SELECT idkonto as konto_id, partn.naz as partner_naz, refer.naz as referent_naz, idpartner as partner_id,
 dospjelo::numeric(16,2) as i_dospjelo, nedospjelo::numeric(16,2) as i_nedospjelo,
 (dospjelo+nedospjelo)::numeric(16,2) as i_ukupno, valuta,
-(get_sifk( 'PARTN', 'ROKP', idpartner  ))::integer AS rok_pl  from
+ convert_to_integer(get_sifk( 'PARTN', 'ROKP', idpartner  )) AS rok_pl  from
 (
 select idkonto, idpartner, (dug_0.sp_duguje_stanje).*  from
 (
