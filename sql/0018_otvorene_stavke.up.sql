@@ -61,12 +61,37 @@ END
 $body$
 LANGUAGE plpgsql;
 
+-- select vrijednost::integer from get_sifk( 'PARTN', 'ROKP', '102084'  );
+CREATE OR REPLACE FUNCTION get_sifk( param_id varchar(8), param_oznaka varchar(4), param_sif varchar(15), OUT vrijednost text  )
+  AS $body$
+
+DECLARE
+  row RECORD;
+  table_name text := 'fmk.sifv';
+BEGIN
+
+vrijednost := '';
+
+FOR row IN
+  EXECUTE 'SELECT naz FROM '  || table_name || ' WHERE id = '''  || param_id ||
+   ''' AND oznaka = ''' || param_oznaka || ''' AND idsif = ''' || param_sif || ''' ORDER by naz'
+LOOP
+
+vrijednost := vrijednost || row.naz;
+END LOOP;
+
+END
+$body$
+LANGUAGE plpgsql;
+
+
 drop view IF EXISTS v_dugovanja;
 
 CREATE VIEW v_dugovanja as
-SELECT idkonto as konto_id, partn.naz as partner_naz, idpartner as partner_id,
+SELECT idkonto as konto_id, partn.naz as partner_naz, refer.naz as referent_naz, idpartner as partner_id,
 dospjelo::numeric(16,2) as i_dospjelo, nedospjelo::numeric(16,2) as i_nedospjelo,
-(dospjelo+nedospjelo)::numeric(16,2) as i_ukupno from
+(dospjelo+nedospjelo)::numeric(16,2) as i_ukupno, valuta,
+(get_sifk( 'PARTN', 'ROKP', idpartner  ))::integer AS rok_pl  from
 (
 select idkonto, idpartner, (dug_0.sp_duguje_stanje).*  from
 (
@@ -77,6 +102,8 @@ order by idkonto, idpartner)
 as kto_partner
 ) as dug_0
 ) as dugovanja
-LEFT JOIN fmk.partn ON partn.id=dugovanja.idpartner;
+LEFT JOIN fmk.partn ON partn.id=dugovanja.idpartner
+LEFT OUTER JOIN fmk.refer ON (partn.idrefer = refer.id);
+
 
 GRANT select on v_dugovanja to xtrole;
