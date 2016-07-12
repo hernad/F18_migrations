@@ -78,3 +78,7 @@ LANGUAGE plpgsql;
 CREATE TRIGGER suban_insert_upate_delete
 AFTER INSERT OR UPDATE OR DELETE ON fmk.fin_suban
     FOR EACH ROW EXECUTE PROCEDURE on_suban_insert_update_delete();
+
+
+-- ovaj indeks je bitan izgleda
+create index IF NOT EXISTS fin_suban_otvrst ON fmk.fin_suban  (trim(idkonto), trim(idpartner), trim(brdok));
