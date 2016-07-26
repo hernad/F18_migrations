@@ -7,22 +7,23 @@ DECLARE
   row RECORD;
   table_name text := 'fmk.fin_suban';
   nCnt integer := 0;
-  nPocStanje double precision := 0;
-  nDospjelo double precision := 0;
-  nNeDospjelo double precision := 0;
+  --nPocStanje double precision;
+  nDospjelo double precision;
+  nNeDospjelo double precision;
   nDospjeloPredhodno double precision := 0;
   dValuta date;
   dRowValuta date;
+  nRowIznos double precision;
 BEGIN
 
-nPocStanje := 0;
+--nPocStanje := 0;
 nDospjelo := 0;
 nNeDospjelo := 0;
 
 dValuta := param_dat_do; -- krecemo od datuma do
 
 nCnt := 0;
---RAISE NOTICE 'start param_konto, param_partner: % %', param_konto, param_partner;
+-- RAISE NOTICE 'start param_konto, param_partner: % %', param_konto, param_partner;
 --PERFORM pg_sleep(1);
 
 FOR row IN
@@ -32,36 +33,29 @@ FOR row IN
 LOOP
 
 nCnt := nCnt + 1;
--- RAISE NOTICE 'start cnt: % datval, datdok: % %, % / % / %', nCnt, row.datdok, row.datval, row.otvst, row.d_p, row.iznosbhd;
+--RAISE NOTICE 'start cnt: % datval, datdok: % %, % / % / %', nCnt, row.datdok, row.datval, row.otvst, row.d_p, row.iznosbhd;
 
 dRowValuta := COALESCE(row.datval, row.datdok);
+nRowIznos := COALESCE(row.iznosbhd, 0);
+
 IF (row.d_p = '1') THEN
 
    IF (row.iznosbhd > 0) AND (dValuta > dRowValuta) THEN -- valuta prve otvorene stavke - otvorene stavke sa najnizim datumom
         dValuta :=  dRowValuta;
    END IF;
 
-  --IF row.idvn='00' THEN -- poc sp_duguje_stanje
-  --   nPocStanje := nPocStanje + row.iznosbhd;
-  --   IF dRowValuta > dValuta THEN
-  --      dValuta :=  dTemp;
-  --   END IF
-
   IF dRowValuta > param_dat_do  THEN -- nije dospijelo do dat_do
-     nNeDospjelo := nNeDospjelo + row.iznosbhd;
+     nNeDospjelo := nNeDospjelo + nRowIznos;
 
   ELSE
-     nDospjelo := nDospjelo + row.iznosbhd;
+     nDospjelo := nDospjelo + nRowIznos;
 
   END IF;
 
+ELSE
+  --IF (row.d_p = '2') THEN  -- uplata
+  nDospjelo := nDospjelo - nRowIznos;
 END IF;
-
-IF (row.d_p = '2') THEN  -- uplata
-  nDospjelo := nDospjelo - row.iznosbhd;
-  --- dValuta := row.datval;
-END IF;
-
 
 IF ( nDospjeloPredhodno < 0) AND (dValuta < dRowValuta)  THEN
    -- u predhodnoj stavci saldo dospjelo je bio u minusu, znaci kupac u avansu gledajuci dospjele obaveze
@@ -76,7 +70,7 @@ nDospjeloPredhodno := nDospjelo;
 
 END LOOP;
 
-pocstanje := nPocStanje;
+pocstanje := 0;
 dospjelo := nDospjelo;
 nedospjelo := nNeDospjelo;
 valuta := dValuta;
