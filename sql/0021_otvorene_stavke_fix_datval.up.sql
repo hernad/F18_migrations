@@ -20,7 +20,7 @@ BEGIN
 nDospjelo := 0;
 nNeDospjelo := 0;
 
-dValuta := param_dat_do; -- krecemo od datuma do
+dValuta := (EXTRACT(YEAR FROM param_dat_do::date)::text || '-12-31')::date;  -- krecemo od datuma 31.12.2016
 
 nCnt := 0;
 -- RAISE NOTICE 'start param_konto, param_partner: % %', param_konto, param_partner;
@@ -63,12 +63,17 @@ IF ( nDospjeloPredhodno < 0) AND (dValuta < dRowValuta)  THEN
         dValuta :=  dRowValuta;
 END IF;
 
-
 -- RAISE NOTICE 'dospjelo: brdok % datdok % dospjelo %  dospjelo predhodno % valuta  % row-valuta %', row.brdok, row.datdok, nDospjelo, nDospjeloPredhodno, dValuta, dRowValuta;
 nDospjeloPredhodno := nDospjelo;
 
-
 END LOOP;
+
+IF nDospjelo < 0 THEN
+   -- Kada je dospjeli dug negativan, iznos minusa dospjelog duga u minusu oduzeti od nedospjelog
+   -- kako bi bio jednak  Ukupnom
+   nNedospjelo := nNedospjelo + nDospjelo;
+   nDospjelo := 0;
+END IF;
 
 pocstanje := 0;
 dospjelo := nDospjelo;
