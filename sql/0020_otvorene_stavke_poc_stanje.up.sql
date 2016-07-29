@@ -66,6 +66,44 @@ LANGUAGE plpgsql;
 
 drop view IF EXISTS v_dugovanja;
 
+-- select vrijednost::integer from get_sifk( 'PARTN', 'ROKP', '102084'  );
+CREATE OR REPLACE FUNCTION get_sifk( param_id varchar(8), param_oznaka varchar(4), param_sif varchar(15), OUT vrijednost text  )
+  AS $body$
+
+DECLARE
+  row RECORD;
+  table_name text := 'fmk.sifv';
+BEGIN
+
+vrijednost := '';
+
+FOR row IN
+  EXECUTE 'SELECT naz FROM '  || table_name || ' WHERE id = '''  || param_id ||
+   ''' AND oznaka = ''' || param_oznaka || ''' AND idsif = ''' || param_sif || ''' ORDER by naz'
+LOOP
+
+vrijednost := vrijednost || row.naz;
+END LOOP;
+
+END
+$body$
+LANGUAGE plpgsql;
+
+--  convert_to_integer( 'bad' ) => 0
+
+CREATE OR REPLACE FUNCTION convert_to_integer(v_input text)
+RETURNS INTEGER AS $$
+DECLARE v_int_value INTEGER DEFAULT 0;
+BEGIN
+    BEGIN
+        v_int_value := v_input::INTEGER;
+    EXCEPTION WHEN OTHERS THEN
+        RAISE NOTICE 'Invalid integer value: "%".  Returning 0.', v_input;
+        RETURN 0;
+    END;
+RETURN v_int_value;
+END;
+$$ LANGUAGE plpgsql;
 
 CREATE TYPE  t_dugovanje AS (konto_id varchar, partner_naz varchar, referent_naz varchar, partner_id varchar,
 i_pocstanje numeric(16,2), i_dospjelo numeric(16,2), i_nedospjelo numeric(16,2), i_ukupno numeric(16,2),
