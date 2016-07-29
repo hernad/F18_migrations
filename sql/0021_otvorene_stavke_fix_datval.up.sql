@@ -21,7 +21,7 @@ nDospjelo := 0;
 nNeDospjelo := 0;
 
 -- dValuta := (EXTRACT(YEAR FROM param_dat_do::date)::text || '-12-31')::date;  -- krecemo od datuma 31.12.2016
-dValute := param_dat_do::date + 200;  -- krecemo od datuma do + 200 dana
+dValuta := param_dat_do::date + 200;  -- krecemo od datuma do + 200 dana
 
 nCnt := 0;
 -- RAISE NOTICE 'start param_konto, param_partner: % %', param_konto, param_partner;
