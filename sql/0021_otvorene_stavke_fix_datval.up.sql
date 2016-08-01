@@ -10,7 +10,7 @@ DECLARE
   --nPocStanje double precision;
   nDospjelo double precision;
   nNeDospjelo double precision;
-  nDospjeloPredhodno double precision := 0;
+  nStanjePredhodno double precision := 0;
   dValuta date;
   dRowValuta date;
   nRowIznos double precision;
@@ -37,9 +37,9 @@ nDospjelo := row.sum;
 --RAISE NOTICE 'suma zatvorenih stavki %', row.sum;
 
 -- suma negativnih stavki - storno duguje
-EXECUTE 'SELECT sum(iznosbhd) FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
+EXECUTE 'SELECT sum(CASE WHEN d_p=''1'' THEN iznosbhd ELSE -iznosbhd END) FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
    ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
-   ''' AND '''  || param_dat_do || ''' AND (d_p=''1'' AND iznosbhd<0 AND datval<''' || param_dat_do || ''') AND otvst='' ''' INTO row;
+   ''' AND '''  || param_dat_do || ''' AND ((d_p=''1'' AND iznosbhd<0) OR (d_p=''2'' AND iznosbhd>0) AND COALESCE(datval,datdok)<''' || param_dat_do || ''') AND otvst='' ''' INTO row;
 nDospjelo := nDospjelo + row.sum;
 
 --RAISE NOTICE 'suma negativnih stavki %', row.sum;
@@ -48,7 +48,7 @@ FOR row IN
   -- samo pozitivne stavke duguju trebamo: AND NOT (d_p='' '' AND iznosbhd<0)
   EXECUTE 'SELECT iznosbhd,datval,datdok,d_p,idvn,otvst,brdok FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
    ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
-   ''' AND '''  || param_dat_do || ''' AND NOT (d_p=''1'' AND iznosbhd<0 AND datval<''' || param_dat_do || ''') AND otvst='' '' ORDER BY idfirma,idkonto,idpartner,datdok,brdok'
+   ''' AND '''  || param_dat_do || ''' AND NOT ((d_p=''1'' AND iznosbhd<0) OR (d_p=''2'' AND iznosbhd>0) AND COALESCE(datval,datdok)<''' || param_dat_do || ''') AND otvst='' '' ORDER BY idfirma,idkonto,idpartner,datdok,brdok'
 LOOP
 
 nCnt := nCnt + 1;
@@ -77,7 +77,7 @@ ELSE
   nDospjelo := nDospjelo - nRowIznos;
 END IF;
 
-IF ( nDospjeloPredhodno < 0) AND (dValuta < dRowValuta)  THEN
+IF ( nStanjePredhodno < 0) AND (dValuta < dRowValuta)  THEN
    -- u predhodnoj stavci saldo dospjelo je bio u minusu, znaci kupac u avansu gledajuci dospjele obaveze
    -- zato pomjeri datum valute nagore
    --RAISE NOTICE 'u predhodnoj stavci je saldo bio u minusu postavljam valutu %', dRowValuta;
@@ -85,8 +85,8 @@ IF ( nDospjeloPredhodno < 0) AND (dValuta < dRowValuta)  THEN
    dValuta :=  dRowValuta;
 END IF;
 
---RAISE NOTICE 'dospjelo: brdok % datdok % dospjelo %  dospjelo predhodno % valuta  % row-valuta %', row.brdok, row.datdok, nDospjelo, nDospjeloPredhodno, dValuta, dRowValuta;
-nDospjeloPredhodno := nDospjelo;
+--RAISE NOTICE 'dospjelo: brdok % datdok % dospjelo %  stanje predhodno % valuta  % row-valuta %', row.brdok, row.datdok, nDospjelo, nStanjePredhodno, dValuta, dRowValuta;
+nStanjePredhodno := nDospjelo + nNedospjelo;
 
 END LOOP;
 
