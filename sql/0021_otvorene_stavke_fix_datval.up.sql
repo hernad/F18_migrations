@@ -24,13 +24,31 @@ nNeDospjelo := 0;
 dValuta := param_dat_do::date + 200;  -- krecemo od datuma do + 200 dana
 
 nCnt := 0;
--- RAISE NOTICE 'start param_konto, param_partner: % %', param_konto, param_partner;
+--RAISE NOTICE 'start param_konto, param_partner: % %', param_konto, param_partner;
 --PERFORM pg_sleep(1);
 
+-- suma zatvorenih stavki - ako je ovo lose uradjeno, neka taj saldo bude pocetna vrijednost dospjelih potrazivanja
+--select sum(CASE WHEN d_p='1' THEN iznosbhd ELSE -iznosbhd END) INTO row FROM fmk.fin_suban where otvst='9' and idpartner like '102125%'
+EXECUTE 'SELECT sum(CASE WHEN d_p=''1'' THEN iznosbhd ELSE -iznosbhd END) FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
+   ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
+   ''' AND '''  || param_dat_do || ''' and otvst=''9''' INTO row;
+nDospjelo := row.sum;
+
+--RAISE NOTICE 'suma zatvorenih stavki %', row.sum;
+
+-- suma negativnih stavki - storno duguje
+EXECUTE 'SELECT sum(iznosbhd) FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
+   ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
+   ''' AND '''  || param_dat_do || ''' AND (d_p=''1'' AND iznosbhd<0 AND datval<''' || param_dat_do || ''') AND otvst='' ''' INTO row;
+nDospjelo := nDospjelo + row.sum;
+
+--RAISE NOTICE 'suma negativnih stavki %', row.sum;
+
 FOR row IN
+  -- samo pozitivne stavke duguju trebamo: AND NOT (d_p='' '' AND iznosbhd<0)
   EXECUTE 'SELECT iznosbhd,datval,datdok,d_p,idvn,otvst,brdok FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
    ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
-   ''' AND '''  || param_dat_do || ''' and otvst='' '' ORDER BY idfirma,idkonto,idpartner,datdok,brdok'
+   ''' AND '''  || param_dat_do || ''' AND NOT (d_p=''1'' AND iznosbhd<0 AND datval<''' || param_dat_do || ''') AND otvst='' '' ORDER BY idfirma,idkonto,idpartner,datdok,brdok'
 LOOP
 
 nCnt := nCnt + 1;
@@ -41,7 +59,8 @@ nRowIznos := COALESCE(row.iznosbhd, 0);
 
 IF (row.d_p = '1') THEN
 
-   IF (row.iznosbhd > 0) AND (dValuta > dRowValuta) THEN -- valuta prve otvorene stavke - otvorene stavke sa najnizim datumom
+   IF row.idvn <> '01' AND (nRowIznos > 0) AND (dValuta > dRowValuta) THEN
+        --RAISE NOTICE 'set valuta prve otvorene stavke - otvorene stavke sa najnizim datumom set valuta: % tekuca valuta: %', dValuta, dRowValuta;
         dValuta :=  dRowValuta;
    END IF;
 
@@ -61,10 +80,12 @@ END IF;
 IF ( nDospjeloPredhodno < 0) AND (dValuta < dRowValuta)  THEN
    -- u predhodnoj stavci saldo dospjelo je bio u minusu, znaci kupac u avansu gledajuci dospjele obaveze
    -- zato pomjeri datum valute nagore
-        dValuta :=  dRowValuta;
+   --RAISE NOTICE 'u predhodnoj stavci je saldo bio u minusu postavljam valutu %', dRowValuta;
+
+   dValuta :=  dRowValuta;
 END IF;
 
--- RAISE NOTICE 'dospjelo: brdok % datdok % dospjelo %  dospjelo predhodno % valuta  % row-valuta %', row.brdok, row.datdok, nDospjelo, nDospjeloPredhodno, dValuta, dRowValuta;
+--RAISE NOTICE 'dospjelo: brdok % datdok % dospjelo %  dospjelo predhodno % valuta  % row-valuta %', row.brdok, row.datdok, nDospjelo, nDospjeloPredhodno, dValuta, dRowValuta;
 nDospjeloPredhodno := nDospjelo;
 
 END LOOP;
