@@ -32,7 +32,8 @@ nCnt := 0;
 EXECUTE 'SELECT sum(CASE WHEN d_p=''1'' THEN iznosbhd ELSE -iznosbhd END) FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
    ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
    ''' AND '''  || param_dat_do || ''' and otvst=''9''' INTO row;
-nDospjelo := row.sum;
+
+nDospjelo := COALESCE( row.sum, 0);
 
 --RAISE NOTICE 'suma zatvorenih stavki %', row.sum;
 
@@ -40,7 +41,7 @@ nDospjelo := row.sum;
 EXECUTE 'SELECT sum(CASE WHEN d_p=''1'' THEN iznosbhd ELSE -iznosbhd END) FROM '  || table_name || ' WHERE idkonto = '''  || param_konto ||
    ''' AND idpartner = ''' || param_partner || ''' AND datdok BETWEEN ''' || param_dat_od ||
    ''' AND '''  || param_dat_do || ''' AND ((d_p=''1'' AND iznosbhd<0) OR (d_p=''2'' AND iznosbhd>0) AND COALESCE(datval,datdok)<''' || param_dat_do || ''') AND otvst='' ''' INTO row;
-nDospjelo := nDospjelo + row.sum;
+nDospjelo := nDospjelo + COALESCE( row.sum, 0);
 
 --RAISE NOTICE 'suma negativnih stavki %', row.sum;
 

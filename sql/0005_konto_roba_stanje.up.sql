@@ -159,6 +159,7 @@ ELSE
      return_rec := OLD;
   ELSE
      datum_limit := MIN( OLD.datdok, NEW.datdok );
+
      mkonto := NEW.mkonto;
      pkonto := NEW.pkonto;
      mkonto_old := OLD.mkonto;
@@ -168,10 +169,9 @@ ELSE
   END IF;
 END IF;
 
-
 -- sve datume koji su veci i koji pripadaju istom mjesecu kao datum koji se brise
 
--- ako imam sljedece stavke na kartici artikla/konta:
+-- ako imamo sljedece stavke na kartici artikla/konta:
 -- 21.01.2015 100, stanje 100
 -- 15.02.2015 100, stanje 200
 -- 10.03.2015 200, stanje 400
